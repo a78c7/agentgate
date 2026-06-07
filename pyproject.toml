@@ -1,0 +1,14 @@
+[project]
+name = "agentgate"
+version = "0.1.0"
+description = "Safety-first CLI and GitHub Action for checking AI-generated code changes before PRs."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "Your Name" }]
+
+[project.scripts]
+agentgate = "agentgate:main"
+
+[tool.agentgate]
+version = "0.1.0"

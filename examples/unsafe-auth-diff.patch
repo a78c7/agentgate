@@ -1,0 +1,13 @@
+diff --git a/auth/oauth_client.py b/auth/oauth_client.py
+new file mode 100644
+index 0000000..2222222
+--- /dev/null
++++ b/auth/oauth_client.py
+@@ -0,0 +1,7 @@
++class OAuthClient:
++    def login(self, token):
++        self.oauth_token = token
++        return "auth complete"
++
++def rotate_password(password):
++    return password

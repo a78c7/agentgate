@@ -1,0 +1,11 @@
+diff --git a/src/formatter.py b/src/formatter.py
+new file mode 100644
+index 0000000..4444444
+--- /dev/null
++++ b/src/formatter.py
+@@ -0,0 +1,5 @@
++def format_title(value):
++    value = value.strip()
++    if not value:
++        return "Untitled"
++    return value.title()

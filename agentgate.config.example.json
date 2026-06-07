@@ -1,0 +1,18 @@
+{
+  "max_changed_files": 12,
+  "max_added_lines": 800,
+  "max_deleted_lines": 400,
+  "block_on_forbidden_path": true,
+  "block_on_forbidden_keyword": true,
+  "block_on_workflow_change": true,
+  "require_tests_section": true,
+  "require_pr_body_sections": true,
+  "require_ai_disclosure": false,
+  "warn_on_dependency_without_lockfile": true,
+  "allowed_docs_only_extensions": [".md", ".mdx", ".rst", ".txt"],
+  "forbidden_paths": [],
+  "forbidden_keywords": [],
+  "override_default_forbidden_paths": false,
+  "override_default_forbidden_keywords": false,
+  "fail_on_warning": false
+}

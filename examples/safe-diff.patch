@@ -1,0 +1,14 @@
+diff --git a/docs/usage.md b/docs/usage.md
+new file mode 100644
+index 0000000..1111111
+--- /dev/null
++++ b/docs/usage.md
+@@ -0,0 +1,8 @@
++# Usage
++
++AgentGate checks AI-generated diffs before they become pull requests.
++
++## Run
++
++python3 agentgate.py check --diff pr.diff
++

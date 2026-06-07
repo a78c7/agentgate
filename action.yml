@@ -1,0 +1,59 @@
+name: AgentGate
+description: Safety-first checks for AI-generated code changes before pull requests.
+author: Your Name
+
+inputs:
+  diff-path:
+    description: Path to a unified diff file.
+    required: false
+    default: ""
+  config-path:
+    description: Path to AgentGate config JSON.
+    required: false
+    default: agentgate.config.example.json
+  pr-body-path:
+    description: Optional PR body Markdown path.
+    required: false
+    default: ""
+  format:
+    description: Report format, markdown or json.
+    required: false
+    default: markdown
+  output-path:
+    description: Optional path to write report.
+    required: false
+    default: ""
+  fail-on-warning:
+    description: Treat warning findings as blocked.
+    required: false
+    default: "false"
+
+runs:
+  using: composite
+  steps:
+    - name: Run AgentGate
+      shell: bash
+      run: |
+        set -euo pipefail
+        args=(check)
+        if [[ -n "${{ inputs.diff-path }}" ]]; then
+          args+=(--diff "${{ inputs.diff-path }}")
+        else
+          args+=(--repo ".")
+        fi
+        if [[ -n "${{ inputs.config-path }}" && -f "${{ inputs.config-path }}" ]]; then
+          args+=(--config "${{ inputs.config-path }}")
+        else
+          args+=(--config "${{ github.action_path }}/agentgate.config.example.json")
+        fi
+        if [[ -n "${{ inputs.pr-body-path }}" ]]; then
+          args+=(--pr-body "${{ inputs.pr-body-path }}")
+        fi
+        args+=(--format "${{ inputs.format }}")
+        if [[ -n "${{ inputs.output-path }}" ]]; then
+          args+=(--output "${{ inputs.output-path }}")
+        fi
+        if [[ "${{ inputs.fail-on-warning }}" == "true" ]]; then
+          args+=(--fail-on-warning)
+        fi
+        python3 "${{ github.action_path }}/agentgate.py" "${args[@]}"
