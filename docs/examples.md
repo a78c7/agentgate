@@ -35,3 +35,19 @@ python3 agentgate.py check --diff examples/safe-diff.patch --config agentgate.co
 ```bash
 python3 agentgate.py check --diff examples/unsafe-secret-diff.patch --config agentgate.config.example.json --format json
 ```
+
+## Sample GitHub Action
+
+See:
+
+```text
+examples/sample-github-action.yml
+```
+
+## Sample Agent Prompt
+
+See:
+
+```text
+examples/sample-agent-prompt.md
+```

@@ -29,3 +29,16 @@ python3 agentgate.py check --repo . --config agentgate.config.example.json
 ## Keep Human Control
 
 AgentGate does not replace human review. It is a gate for obvious safety and process risks.
+
+## Suggested Agent Instruction
+
+Give your coding agent a clear boundary before it edits files:
+
+```text
+Do not touch secrets, tokens, auth, payment, KYC, wallet, migration, or GitHub Actions workflow files.
+Keep the change small.
+Include Summary, Changes, Tests, and Risk sections in the PR body.
+Run AgentGate before proposing a PR.
+```
+
+See `examples/sample-agent-prompt.md`.

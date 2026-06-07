@@ -1,0 +1,29 @@
+name: AgentGate
+
+on:
+  pull_request:
+
+jobs:
+  agentgate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Build PR diff
+        run: git diff origin/${{ github.base_ref }}...HEAD > pr.diff
+
+      - name: Run AgentGate
+        uses: a78c7/agentgate@v0.1.0
+        with:
+          diff-path: pr.diff
+          config-path: agentgate.config.example.json
+          output-path: agentgate-report.md
+
+      - name: Upload AgentGate report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: agentgate-report
+          path: agentgate-report.md

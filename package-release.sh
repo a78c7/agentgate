@@ -16,10 +16,13 @@ required_files=(
   "LICENSE"
   "PRODUCT_REPORT.md"
   "OPEN_SOURCE_READY_REPORT.md"
+  "POST_RELEASE_POLISH_REPORT.md"
   "SECURITY.md"
   "CONTRIBUTING.md"
   "CODE_OF_CONDUCT.md"
   "action.yml"
+  "assets/agentgate-flow.svg"
+  "assets/cli-demo.svg"
   "agentgate.py"
   "agentgate.config.example.json"
   "pyproject.toml"
@@ -35,6 +38,9 @@ required_files=(
   "docs/github-action-usage.md"
   "docs/ai-agent-workflow.md"
   "docs/examples.md"
+  "docs/demo-assets.md"
+  "docs/repo-topics.md"
+  "docs/social-announcement.md"
   "examples/safe-diff.patch"
   "examples/unsafe-auth-diff.patch"
   "examples/unsafe-secret-diff.patch"
@@ -43,6 +49,8 @@ required_files=(
   "examples/sample-pr-body.md"
   "examples/sample-report.md"
   "examples/sample-agentgate.config.json"
+  "examples/sample-github-action.yml"
+  "examples/sample-agent-prompt.md"
   "tests/test_agentgate.py"
 )
 
@@ -62,10 +70,12 @@ zip -r "$ZIP_PATH" \
   LICENSE \
   PRODUCT_REPORT.md \
   OPEN_SOURCE_READY_REPORT.md \
+  POST_RELEASE_POLISH_REPORT.md \
   SECURITY.md \
   CONTRIBUTING.md \
   CODE_OF_CONDUCT.md \
   action.yml \
+  assets \
   agentgate.py \
   agentgate.config.example.json \
   pyproject.toml \

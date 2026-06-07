@@ -1,49 +1,107 @@
 # Quickstart
 
-## Run The CLI
+This guide gets you from clone to first AgentGate report in a few minutes.
+
+## 1. Clone
+
+```bash
+git clone https://github.com/a78c7/agentgate.git
+cd agentgate
+```
+
+## 2. Run A Passing Diff
 
 ```bash
 python3 agentgate.py check --diff examples/safe-diff.patch --config agentgate.config.example.json
 ```
 
-Expected result: `PASS`, exit code `0`.
+Expected:
 
-## Try A Blocked Diff
+- Result: `PASS`
+- Exit code: `0`
+
+## 3. Run A Blocked Diff
 
 ```bash
 python3 agentgate.py check --diff examples/unsafe-secret-diff.patch --config agentgate.config.example.json
 ```
 
-Expected result: `BLOCKED`, exit code `2`.
+Expected:
 
-## Try A Warning
+- Result: `BLOCKED`
+- Exit code: `2`
+
+This example uses placeholder strings only. It demonstrates how AgentGate blocks `.env` and secret-like added lines.
+
+## 4. Run A Warning Diff
 
 ```bash
 python3 agentgate.py check --diff examples/package-no-lock-diff.patch --config agentgate.config.example.json
 ```
 
-Expected result: `WARNING`, exit code `1`.
+Expected:
 
-## Generate Markdown Report
+- Result: `WARNING`
+- Exit code: `1`
+
+The example changes `package.json` without a lockfile.
+
+## 5. Generate Markdown And JSON Reports
+
+Markdown:
 
 ```bash
 python3 agentgate.py check --diff examples/safe-diff.patch --config agentgate.config.example.json --output examples/sample-report.md
 ```
 
-## Generate JSON Report
+JSON:
 
 ```bash
 python3 agentgate.py check --diff examples/unsafe-secret-diff.patch --config agentgate.config.example.json --format json
 ```
 
-## Check A Repository
+## 6. Check Your Own Repository
 
-AgentGate first checks staged changes. If there are no staged changes, it checks unstaged changes.
+AgentGate checks staged changes first. If nothing is staged, it checks unstaged changes.
 
 ```bash
 python3 agentgate.py check --repo . --config agentgate.config.example.json
 ```
 
-## GitHub Action
+## 7. Add The GitHub Action
 
-Use `action.yml` as a composite action. See `docs/github-action-usage.md`.
+Create a workflow that builds a PR diff and runs AgentGate:
+
+```yaml
+name: AgentGate
+
+on:
+  pull_request:
+
+jobs:
+  agentgate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Build PR diff
+        run: git diff origin/${{ github.base_ref }}...HEAD > pr.diff
+
+      - name: Run AgentGate
+        uses: a78c7/agentgate@v0.1.0
+        with:
+          diff-path: pr.diff
+          config-path: agentgate.config.example.json
+```
+
+## 8. Run Tests
+
+```bash
+python3 -m unittest discover -s tests
+```
+
+## Safety Reminder
+
+AgentGate does not read cookies, keychains, password managers, token values, or private credentials. It does not upload code, call external APIs, create PRs, comment on PRs, or handle payment/KYC/payout flows.

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="620" viewBox="0 0 1200 620" role="img" aria-label="AgentGate CLI demo">
+  <rect width="1200" height="620" rx="24" fill="#0d1117"/>
+  <rect x="40" y="40" width="1120" height="540" rx="16" fill="#161b22" stroke="#30363d"/>
+  <circle cx="72" cy="70" r="8" fill="#ff7b72"/>
+  <circle cx="98" cy="70" r="8" fill="#d29922"/>
+  <circle cx="124" cy="70" r="8" fill="#3fb950"/>
+  <text x="54" y="125" font-family="SFMono-Regular,Menlo,Consolas,monospace" font-size="20" fill="#7ee787">$ python3 agentgate.py check --diff examples/unsafe-secret-diff.patch --config agentgate.config.example.json</text>
+  <text x="54" y="178" font-family="SFMono-Regular,Menlo,Consolas,monospace" font-size="27" font-weight="800" fill="#e6edf3"># AgentGate Report</text>
+  <text x="54" y="230" font-family="SFMono-Regular,Menlo,Consolas,monospace" font-size="22" font-weight="800" fill="#e6edf3">## Result</text>
+  <text x="54" y="268" font-family="SFMono-Regular,Menlo,Consolas,monospace" font-size="20" fill="#ff7b72">- BLOCKED</text>
+  <text x="54" y="306" font-family="SFMono-Regular,Menlo,Consolas,monospace" font-size="20" fill="#ff7b72">- Exit code: 2</text>
+  <text x="54" y="360" font-family="SFMono-Regular,Menlo,Consolas,monospace" font-size="22" font-weight="800" fill="#e6edf3">## Blocking Findings</text>
+  <text x="54" y="398" font-family="SFMono-Regular,Menlo,Consolas,monospace" font-size="18" fill="#f0f6fc">- forbidden_path: .env</text>
+  <text x="54" y="432" font-family="SFMono-Regular,Menlo,Consolas,monospace" font-size="18" fill="#f0f6fc">- forbidden_keyword: token</text>
+  <text x="54" y="466" font-family="SFMono-Regular,Menlo,Consolas,monospace" font-size="18" fill="#f0f6fc">- forbidden_keyword: private_key</text>
+  <text x="54" y="520" font-family="SFMono-Regular,Menlo,Consolas,monospace" font-size="18" fill="#8b949e">Fix risky changes before opening a PR.</text>
+</svg>
