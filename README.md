@@ -22,6 +22,20 @@ python3 agentgate.py check --diff examples/unsafe-secret-diff.patch --config age
 
 If the diff touches forbidden paths like `.env`, adds keywords like `token` or `secret`, changes GitHub Actions workflows, exceeds size limits, or lacks required PR body evidence, AgentGate reports it before the change reaches review.
 
+## Try It In 60 Seconds
+
+```bash
+git clone https://github.com/a78c7/agentgate.git
+cd agentgate
+python3 agentgate.py check --diff examples/safe-diff.patch --config agentgate.config.example.json
+```
+
+Then run the blocked example:
+
+```bash
+python3 agentgate.py check --diff examples/unsafe-secret-diff.patch --config agentgate.config.example.json
+```
+
 ## Why This Exists
 
 AgentGate is built for teams and solo developers using Codex, Claude Code, Cursor, and other AI coding agents. It does not try to replace human review. It catches obvious pre-PR risk so reviewers spend less time on changes that should have been stopped earlier.
@@ -140,6 +154,16 @@ Fail on warnings:
 
 More examples: [docs/github-action-usage.md](docs/github-action-usage.md).
 
+## Use With AI Coding Agents
+
+AgentGate fits after an agent produces a diff and before a PR is opened:
+
+- Codex workflow: [examples/codex-workflow.md](examples/codex-workflow.md)
+- Claude Code workflow: [examples/claude-code-workflow.md](examples/claude-code-workflow.md)
+- Cursor workflow: [examples/cursor-workflow.md](examples/cursor-workflow.md)
+
+For team rollout guidance, see [ADOPTION_GUIDE.md](ADOPTION_GUIDE.md).
+
 ## Safety Model
 
 AgentGate is local-first and conservative by default.
@@ -236,6 +260,8 @@ bash package-release.sh
 
 ## Documentation
 
+- [Adoption guide](ADOPTION_GUIDE.md)
+- [Roadmap](ROADMAP.md)
 - [Safety model](docs/safety-model.md)
 - [Config reference](docs/config-reference.md)
 - [GitHub Action usage](docs/github-action-usage.md)
@@ -244,6 +270,12 @@ bash package-release.sh
 - [Demo assets](docs/demo-assets.md)
 - [Suggested repo topics](docs/repo-topics.md)
 - [Social announcement copy](docs/social-announcement.md)
+
+## Contributing Ideas
+
+AgentGate is intentionally small and conservative. Good contribution ideas include clearer reports, safer defaults, better examples, and config presets that make review easier without reading secrets or automating PR actions.
+
+Start with [docs/issue-seed-plan.md](docs/issue-seed-plan.md), [ROADMAP.md](ROADMAP.md), or the question issue template.
 
 ## License
 
