@@ -280,3 +280,9 @@ Start with [docs/issue-seed-plan.md](docs/issue-seed-plan.md), [ROADMAP.md](ROAD
 ## License
 
 MIT License. See [LICENSE](LICENSE).
+
+## Part of AI Agent Safety Toolkit
+
+- BountyLens: https://github.com/a78c7/bountylens
+- Testability Doctor: https://github.com/a78c7/testability-doctor
+- Toolkit: https://github.com/a78c7/ai-agent-safety-toolkit
