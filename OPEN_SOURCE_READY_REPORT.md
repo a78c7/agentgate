@@ -6,11 +6,11 @@
 
 ## Status
 
-Ready for GitHub open-source release.
+Published to GitHub as an open-source project.
 
 ## Repository
 
-Planned GitHub repository:
+GitHub repository:
 
 ```text
 https://github.com/a78c7/agentgate
@@ -18,22 +18,28 @@ https://github.com/a78c7/agentgate
 
 ## Release
 
-Planned tag:
+Tag:
 
 ```text
 v0.1.0
 ```
 
-Planned release asset:
+Release asset:
 
 ```text
 dist/agentgate-0.1.0.zip
 ```
 
-Expected release URL:
+Release URL:
 
 ```text
 https://github.com/a78c7/agentgate/releases/tag/v0.1.0
+```
+
+Commit:
+
+```text
+dd9ccb80015161253cc20d5e003062f6ce31e4e2
 ```
 
 ## Tests Result
@@ -127,12 +133,12 @@ AgentGate is a CLI and composite GitHub Action. It does not use Docker, external
 - No `codex-bounty-hunter` included.
 - No payment, KYC, withdrawal, tax, or Sponsors handling.
 
-## GitHub Release Plan
+## GitHub Release Result
 
-1. Initialize git.
-2. Commit source and docs.
-3. Create public repo `a78c7/agentgate`.
-4. Push `main`.
-5. Tag `v0.1.0`.
-6. Create GitHub Release `v0.1.0`.
-7. Upload `dist/agentgate-0.1.0.zip` as release asset.
+- Git initialized: yes.
+- Source committed: yes.
+- Public repo created: yes.
+- `main` pushed: yes.
+- Tag `v0.1.0` pushed: yes.
+- GitHub Release `v0.1.0` created: yes.
+- `dist/agentgate-0.1.0.zip` uploaded: yes.
