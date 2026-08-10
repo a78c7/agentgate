@@ -84,4 +84,3 @@ These fields let a harness display evidence, route a blocked change to a human, 
 AgentGate can be placed in workflows that use Codex, Claude Code, Cursor, OpenHands, or another coding agent that produces a local diff. These are workflow placements, not official product integrations.
 
 The boundary remains the same: AgentGate checks configured, diff-visible risk. It does not prove correctness, execute tests, or replace human review.
-
