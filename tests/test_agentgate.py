@@ -47,6 +47,35 @@ class AgentGateTest(unittest.TestCase):
         payload = json.loads(result.stdout)
         self.assertTrue(any(item["rule"] == "forbidden_path" for item in payload["blocking_findings"]))
 
+    def test_workflow_change_blocks(self):
+        diff = """diff --git a/.github/workflows/test.yml b/.github/workflows/test.yml
+--- a/.github/workflows/test.yml
++++ b/.github/workflows/test.yml
+@@ -1 +1,2 @@
+ name: Test
++on: push
+"""
+        stats, added = agentgate.parse_diff(diff)
+        report = agentgate.make_report(diff, agentgate.deep_merge_config(None), None)
+        self.assertEqual(stats.changed_files, [".github/workflows/test.yml"])
+        self.assertIn(".github/workflows/test.yml", added)
+        self.assertEqual(report.exit_code, 2)
+        self.assertTrue(any(item["rule"] == "workflow_modification" for item in report.blocking_findings))
+
+    def test_diff_size_limit_blocks(self):
+        diff = """diff --git a/src/example.py b/src/example.py
+--- a/src/example.py
++++ b/src/example.py
+@@ -0,0 +1,2 @@
++first = 1
++second = 2
+"""
+        config = agentgate.deep_merge_config(None)
+        config["max_added_lines"] = 1
+        report = agentgate.make_report(diff, config, None)
+        self.assertEqual(report.exit_code, 2)
+        self.assertTrue(any(item["rule"] == "diff_size" for item in report.blocking_findings))
+
     def test_dependency_without_lockfile_warns(self):
         result = self.run_cli("check", "--diff", "examples/package-no-lock-diff.patch", "--config", str(CONFIG), "--format", "json")
         self.assertEqual(result.returncode, 1)
@@ -100,6 +129,16 @@ class AgentGateTest(unittest.TestCase):
         self.assertEqual(result.returncode, 0)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["max_changed_files"], 12)
+
+    def test_json_output_has_documented_structure(self):
+        result = self.run_cli("check", "--diff", "examples/safe-diff.patch", "--format", "json")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(
+            set(payload),
+            {"result", "exit_code", "summary", "blocking_findings", "warnings", "passed_checks"},
+        )
+        self.assertEqual(payload["exit_code"], result.returncode)
 
     def test_fail_on_warning_blocks(self):
         result = self.run_cli(

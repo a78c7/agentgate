@@ -5,10 +5,13 @@ description = "Safety-first CLI and GitHub Action for checking AI-generated code
 readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "MIT" }
-authors = [{ name = "Your Name" }]
+authors = [{ name = "a78c7" }]
 
 [project.scripts]
 agentgate = "agentgate:main"
+
+[tool.setuptools]
+py-modules = ["agentgate"]
 
 [tool.agentgate]
 version = "0.1.0"

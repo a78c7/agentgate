@@ -1,6 +1,6 @@
 name: AgentGate
 description: Safety-first checks for AI-generated code changes before pull requests.
-author: Your Name
+author: a78c7
 
 inputs:
   diff-path:

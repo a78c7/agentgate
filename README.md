@@ -1,90 +1,101 @@
 # AgentGate
 
-**A safety-first CLI and GitHub Action that checks AI-generated code changes before they become a pull request.**
+**Safety and verification gate for AI-generated code changes before pull requests.**
 
 [![Test](https://github.com/a78c7/agentgate/actions/workflows/test.yml/badge.svg)](https://github.com/a78c7/agentgate/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Release](https://img.shields.io/badge/release-v0.1.0-blue.svg)](https://github.com/a78c7/agentgate/releases/tag/v0.1.0)
 
-AgentGate 是一个安全优先的 CLI + GitHub Action，用来在 Codex / Claude Code / Cursor / 其他 AI agent 生成改动之后，检查这些改动是否安全、是否可测试、是否不该进入 PR。
+Coding agents can generate a useful diff quickly. The harder question is whether that diff stayed within scope, avoided sensitive areas, preserved dependency integrity, and carries enough evidence for review. AgentGate runs deterministic, policy-based checks on the generated diff between agent execution and human review.
 
-![AgentGate workflow](assets/agentgate-flow.svg)
+**AgentGate is not another coding agent. It checks what the agent changed.** It is a vendor-neutral harness component: a Python standard-library CLI for local workflows and a composite GitHub Action for CI.
 
-## 30-Second Explanation
-
-AI coding agents can produce useful code quickly, but they can also touch risky files, add suspicious keywords, skip test evidence, change workflows, or modify dependencies without lockfiles.
-
-AgentGate gives you a small local gate before the PR:
-
-```bash
-python3 agentgate.py check --diff examples/unsafe-secret-diff.patch --config agentgate.config.example.json
-```
-
-If the diff touches forbidden paths like `.env`, adds keywords like `token` or `secret`, changes GitHub Actions workflows, exceeds size limits, or lacks required PR body evidence, AgentGate reports it before the change reaches review.
-
-## Try It In 60 Seconds
+## Try it in 60 seconds
 
 ```bash
 git clone https://github.com/a78c7/agentgate.git
 cd agentgate
-python3 agentgate.py check --diff examples/safe-diff.patch --config agentgate.config.example.json
+
+# Safe documentation change: PASS, exit 0
+python3 agentgate.py check \
+  --diff examples/safe-diff.patch \
+  --config agentgate.config.example.json
+
+# Sensitive .env change: BLOCKED, exit 2
+python3 agentgate.py check \
+  --diff examples/unsafe-secret-diff.patch \
+  --config agentgate.config.example.json
 ```
 
-Then run the blocked example:
-
-```bash
-python3 agentgate.py check --diff examples/unsafe-secret-diff.patch --config agentgate.config.example.json
-```
-
-## Why This Exists
-
-AgentGate is built for teams and solo developers using Codex, Claude Code, Cursor, and other AI coding agents. It does not try to replace human review. It catches obvious pre-PR risk so reviewers spend less time on changes that should have been stopped earlier.
-
-The core idea:
+Excerpt from the blocked output produced by the command above:
 
 ```text
-AI-generated diff -> AgentGate -> human review -> tests -> PR
+## Result
+
+- BLOCKED
+- Exit code: 2
+
+## Blocking Findings
+
+- `forbidden_path`: Changed file matches forbidden path pattern `.env`. Evidence: `.env`.
+- `forbidden_keyword`: Added line contains forbidden keyword `token`. Evidence: `.env: added line 1`.
 ```
 
-## Quick Example
+The examples contain placeholders only—no real credentials. AgentGate requires Python 3.9+ and has no third-party runtime dependencies.
 
-Run a safe docs diff:
+## Where AgentGate fits
 
-```bash
-python3 agentgate.py check --diff examples/safe-diff.patch --config agentgate.config.example.json
+```mermaid
+flowchart LR
+    T["Developer / task"] --> A["Coding agent"]
+    A --> D["Generated diff"]
+    D --> G["AgentGate CLI"]
+    G --> V["Safety + verification checks"]
+    V --> H["Human review"]
+    H --> P["Pull request"]
+    P --> C["AgentGate GitHub Action"]
+    C --> M["Human merge decision"]
 ```
 
-Expected result: `PASS`, exit code `0`.
+AgentGate is designed as a component inside an agent harness or coding-agent workflow, not as a replacement for the harness itself. Generation may be probabilistic; this verification stage applies explicit local policy and returns a reproducible report and exit code.
 
-Run an unsafe placeholder secret diff:
+Common integration points:
 
-```bash
-python3 agentgate.py check --diff examples/unsafe-secret-diff.patch --config agentgate.config.example.json
-```
+- **Pre-PR verification:** check the agent's local diff before creating a PR.
+- **Human-in-the-loop gate:** stop automatic continuation when configured risk is found.
+- **CI verification:** run the same policy on a PR diff with the GitHub Action.
 
-Expected result: `BLOCKED`, exit code `2`.
+See [Using AgentGate inside an agent harness](docs/HARNESS_INTEGRATION.md).
 
-Run JSON output:
+## What AgentGate verifies
 
-```bash
-python3 agentgate.py check --diff examples/unsafe-secret-diff.patch --config agentgate.config.example.json --format json
-```
+| Area | Implemented checks | Default result |
+| --- | --- | --- |
+| Scope | Changed-file and added/deleted-line limits | Block |
+| Sensitive areas | Configurable forbidden paths, including credential, auth, payment, migration, and workflow paths | Block |
+| Added content | Configurable forbidden keywords in added diff lines | Block |
+| Workflow integrity | Changes under `.github/workflows/` | Block |
+| Dependency integrity | JavaScript, Rust, and Go manifest changes without matching lockfiles; Python dependency-file changes | Warn |
+| Review evidence | Required PR body sections and explicit test command/result evidence when `--pr-body` is supplied | Block |
+| AI disclosure | Optional policy for AI-assistance disclosure in a supplied PR body | Warn or block |
 
-## CLI Usage
+Rules and severity are configurable. Custom forbidden paths and keywords append to the conservative defaults unless explicitly configured to replace them.
 
-Check a unified diff:
+## Failure model and limits
 
-```bash
-python3 agentgate.py check --diff examples/safe-diff.patch --config agentgate.config.example.json
-```
+AgentGate targets concrete failure modes visible in a diff: an agent touching unrelated sensitive files, editing CI workflows unexpectedly, producing an oversized change, introducing dependency drift, or submitting incomplete test and risk evidence.
 
-Check a repository. AgentGate uses `git diff --cached` first, then `git diff` if nothing is staged:
+It deliberately does **not** prove that generated code is correct or secure. A pass means that no configured rule blocked the supplied input—not that the change is ready to merge. AgentGate is not SAST, a secret-value validator, a test runner, or an approval system. Human review remains required.
+
+## CLI
+
+Check staged changes, or unstaged changes when nothing is staged:
 
 ```bash
 python3 agentgate.py check --repo . --config agentgate.config.example.json
 ```
 
-Validate PR body sections and test evidence:
+Validate a PR body and its test evidence:
 
 ```bash
 python3 agentgate.py check \
@@ -93,30 +104,30 @@ python3 agentgate.py check \
   --pr-body examples/sample-pr-body.md
 ```
 
-Write a Markdown report:
+Without `--pr-body`, PR body and test-evidence checks are skipped. AgentGate does not run the tests named in a PR body; it verifies that explicit evidence is present.
+
+Machine-readable output for harness automation:
 
 ```bash
 python3 agentgate.py check \
-  --diff examples/safe-diff.patch \
+  --diff examples/unsafe-secret-diff.patch \
   --config agentgate.config.example.json \
-  --output examples/sample-report.md
+  --format json
 ```
 
-Print the default config:
+The JSON result includes `result`, `exit_code`, diff summary, blocking findings, warnings, and passed checks. Markdown can also be written with `--output report.md`.
 
-```bash
-python3 agentgate.py init-config
-```
+Exit codes provide automation signals:
 
-## Exit Codes
+- `0` — pass
+- `1` — warnings only
+- `2` — blocked or command error
 
-- `0` = pass
-- `1` = warnings only
-- `2` = blocked
+Use `--fail-on-warning` to turn warnings into blocking findings. Run `python3 agentgate.py init-config` to print the default configuration. See the [config reference](docs/config-reference.md) and [examples](docs/examples.md).
 
-## GitHub Action Usage
+## GitHub Action
 
-AgentGate is a composite action. It does not use Docker, third-party Python packages, secrets, or external APIs.
+AgentGate ships as a composite action. The workflow author builds the PR diff and passes it to the action:
 
 ```yaml
 name: AgentGate
@@ -142,154 +153,31 @@ jobs:
           config-path: agentgate.config.example.json
 ```
 
-Fail on warnings:
+The Action also supports JSON output, report files, PR body input, and `fail-on-warning`. See [GitHub Action usage](docs/github-action-usage.md).
 
-```yaml
-      - name: Run AgentGate
-        uses: a78c7/agentgate@v0.1.0
-        with:
-          diff-path: pr.diff
-          fail-on-warning: "true"
-```
+## Local-first trust boundary
 
-More examples: [docs/github-action-usage.md](docs/github-action-usage.md).
+The current CLI reads only the supplied diff or local Git diff, optional JSON config, and optional PR body. It uses the Python standard library and does not upload source code, call model APIs or other external APIs, read environment-variable values, access browser cookies, keychains, or password managers, create PRs, approve changes, or merge code. No model API key is required.
 
-## Use With AI Coding Agents
-
-AgentGate fits after an agent produces a diff and before a PR is opened:
-
-- Codex workflow: [examples/codex-workflow.md](examples/codex-workflow.md)
-- Claude Code workflow: [examples/claude-code-workflow.md](examples/claude-code-workflow.md)
-- Cursor workflow: [examples/cursor-workflow.md](examples/cursor-workflow.md)
-
-For team rollout guidance, see [ADOPTION_GUIDE.md](ADOPTION_GUIDE.md).
-
-## Safety Model
-
-AgentGate is local-first and conservative by default.
-
-It does not:
-
-- Read cookies, keychain data, password managers, private credentials, or tokens.
-- Read environment variables for token values.
-- Upload code.
-- Call external APIs.
-- Use paid services.
-- Handle KYC, payment, payout, withdrawal, wallet, tax, or banking flows.
-- Enable GitHub Sponsors.
-- Automatically comment on pull requests.
-- Automatically create pull requests.
-- Replace human review.
-
-## What AgentGate Blocks
-
-By default, AgentGate blocks:
-
-- Forbidden paths such as `.env`, `.npmrc`, `.pypirc`, `secrets/`, `credentials/`, `auth/`, `oauth/`, `payment/`, `billing/`, `wallet/`, `crypto/`, `kyc/`, `migrations/`, and `.github/workflows/`.
-- Forbidden keywords in added lines, including `password`, `token`, `secret`, `credential`, `api_key`, `private_key`, `oauth`, `auth`, `payment`, `stripe`, `wallet`, `crypto`, `kyc`, `exploit`, `rce`, `xss`, `csrf`, and `ssrf`.
-- GitHub Actions workflow modifications.
-- Diffs exceeding configured file, added-line, or deleted-line limits.
-- PR bodies missing required Summary, Changes, Tests, or Risk sections when `--pr-body` is provided and required by config.
-- PR bodies missing explicit test command/result evidence when required by config.
-
-## What AgentGate Warns About
-
-By default, AgentGate warns about:
-
-- `package.json` changes without `package-lock.json`, `pnpm-lock.yaml`, or `yarn.lock`.
-- `Cargo.toml` changes without `Cargo.lock`.
-- `go.mod` changes without `go.sum`.
-- `pyproject.toml` or `requirements.txt` dependency changes that need manual review.
-- Missing AI assistance disclosure when disclosure is not configured as blocking.
-
-## What AgentGate Does Not Do
-
-AgentGate does not make a final security decision. It is a pre-PR guardrail. A passing report means no configured rule blocked the diff; it does not mean the change is correct, secure, or ready to merge.
-
-## Installation
-
-Clone the repo:
-
-```bash
-git clone https://github.com/a78c7/agentgate.git
-cd agentgate
-```
-
-Run the CLI with Python 3.9 or newer:
-
-```bash
-python3 agentgate.py check --diff examples/safe-diff.patch --config agentgate.config.example.json
-```
-
-No third-party dependencies are required.
-
-## Configuration
-
-Start from:
-
-```text
-agentgate.config.example.json
-```
-
-Custom `forbidden_paths` and `forbidden_keywords` append to defaults unless:
-
-- `override_default_forbidden_paths` is `true`
-- `override_default_forbidden_keywords` is `true`
-
-Safety defaults are intentionally conservative. See [docs/config-reference.md](docs/config-reference.md).
+See the [security policy](SECURITY.md) and [safety model](docs/safety-model.md).
 
 ## Development
-
-Run tests:
 
 ```bash
 python3 -m unittest discover -s tests
 ```
 
-Generate the sample report:
+Additional guides:
 
-```bash
-python3 agentgate.py check --diff examples/safe-diff.patch --config agentgate.config.example.json --output examples/sample-report.md
-```
-
-Build the release ZIP:
-
-```bash
-bash package-release.sh
-```
-
-## Documentation
-
+- [Quickstart](QUICKSTART.md)
 - [Adoption guide](ADOPTION_GUIDE.md)
 - [Roadmap](ROADMAP.md)
-- [Safety model](docs/safety-model.md)
-- [Config reference](docs/config-reference.md)
-- [GitHub Action usage](docs/github-action-usage.md)
-- [AI agent workflow](docs/ai-agent-workflow.md)
-- [Examples](docs/examples.md)
-- [Demo assets](docs/demo-assets.md)
-- [Suggested repo topics](docs/repo-topics.md)
-- [Social announcement copy](docs/social-announcement.md)
+- [Codex workflow](examples/codex-workflow.md)
+- [Claude Code workflow](examples/claude-code-workflow.md)
+- [Cursor workflow](examples/cursor-workflow.md)
 
-## Contributing Ideas
-
-AgentGate is intentionally small and conservative. Good contribution ideas include clearer reports, safer defaults, better examples, and config presets that make review easier without reading secrets or automating PR actions.
-
-Start with [docs/issue-seed-plan.md](docs/issue-seed-plan.md), [ROADMAP.md](ROADMAP.md), or the question issue template.
+Contributions are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
 MIT License. See [LICENSE](LICENSE).
-
-## Part of AI Agent Safety Toolkit
-
-- BountyLens: https://github.com/a78c7/bountylens
-- Testability Doctor: https://github.com/a78c7/testability-doctor
-- Toolkit: https://github.com/a78c7/ai-agent-safety-toolkit
-
-## Launch story
-
-This project is part of the AI Agent Safety Toolkit.
-
-Read the full launch story:
-https://github.com/a78c7/ai-agent-safety-toolkit/blob/main/launch/launch-blog-post.md
